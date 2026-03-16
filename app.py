@@ -222,39 +222,36 @@ def load_data(path="DF_EPV_version4.xlsx"):
         df["TESTIGO"] = bin_col(df["P121_TESTIGO"])
 
     if "SEXO" in df.columns:
-        sexo_num = pd.to_numeric(df["SEXO"], errors="coerce")
-        df["GENERO"] = pd.Series(
-            np.where(sexo_num == 0, "Mujer", np.where(sexo_num == 1, "Hombre", np.nan)),
-            index=df.index
-        )
+    sexo_num = pd.to_numeric(df["SEXO"], errors="coerce")
+    df["GENERO"] = sexo_num.map({0: "Mujer", 1: "Hombre"})
 
     if "P111_SEGURIDAD" in df.columns:
-        s = to_numeric_safe(df["P111_SEGURIDAD"])
-        df["PERCEP_NUM"] = s
-        df["PERCEP_CAT"] = np.select(
-            [s <= 2, s == 3, s >= 4],
-            ["Inseguro", "Neutro", "Seguro"],
-            default=np.nan
-        )
+    s = to_numeric_safe(df["P111_SEGURIDAD"])
+    df["PERCEP_NUM"] = s
+    df["PERCEP_CAT"] = np.select(
+        [s <= 2, s == 3, s >= 4],
+        ["Inseguro", "Neutro", "Seguro"],
+        default=None
+    )
 
     if "P2141_DENUNCIA" in df.columns:
-        d = df["P2141_DENUNCIA"].astype(str).str.strip()
-        df["DENUNCIA_BIN"] = np.select(
-            [d == "Sí", d == "No"],
-            [1, 0],
-            default=np.nan
-        )
+    d = df["P2141_DENUNCIA"].astype(str).str.strip()
+    df["DENUNCIA_BIN"] = np.select(
+        [d == "Sí", d == "No"],
+        [1, 0],
+        default=np.nan
+    )
 
     if "P102_BARRIO" in df.columns:
         df["BARRIO_INSEG"] = 1 - pd.to_numeric(df["P102_BARRIO"], errors="coerce")
 
     if "P106_CAMBIO" in df.columns:
-        cambio = pd.to_numeric(df["P106_CAMBIO"], errors="coerce")
-        df["CAMBIO_CAT"] = np.select(
-            [cambio == 0, cambio == 1, cambio == 2],
-            ["Empeoró", "Igual", "Mejoró"],
-            default=np.nan
-        )
+    cambio = pd.to_numeric(df["P106_CAMBIO"], errors="coerce")
+    df["CAMBIO_CAT"] = np.select(
+        [cambio == 0, cambio == 1, cambio == 2],
+        ["Empeoró", "Igual", "Mejoró"],
+        default=None
+    )
 
     p233_cols = [c for c in df.columns if str(c).startswith("P233_")]
     if p233_cols:
